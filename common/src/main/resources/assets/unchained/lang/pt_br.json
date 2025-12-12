@@ -1,0 +1,19 @@
+{
+  "unchained.notification.hidden.spawn": "Sua caçada atrai um(a) %1$s %2$s com sua habilidade oculta!",
+  "unchained.notification.hidden.fish": "Sua viagem de pesca pescou um(a) %1$s %2$s com sua habilidade oculta!",
+  "unchained.notification.hidden.egg": "Sua aura nutridora despertou a habilidade oculta do seu %1$s %2$s!",
+  "unchained.notification.hidden.resurrection": "Sua maestria técnica despertou a habilidade oculta do seu %1$s %2$s revivido!",
+  "unchained.notification.hidden.capture": "Seu vínculo com o(a) %1$s %2$s capturado(a) revelou sua habilidade oculta!",
+  "unchained.notification.hidden.snack": "A qualidade do seu petisco atraiu um(a) %1$s %2$s com sua habilidade oculta!",
+  "unchained.notification.iv.spawn": "Sua caçada atrai um(a) %1$s %2$s com IVs perfeitos!",
+  "unchained.notification.iv.fish": "Sua viagem de pesca pescou um(a) %1$s %2$s com IVs perfeitos!",
+  "unchained.notification.iv.egg": "Sua aura nutridora despertou IVs perfeitos no seu %1$s %2$s!",
+  "unchained.notification.iv.resurrection": "Sua maestria técnica despertou IVs perfeitos no seu %1$s %2$s revivido!",
+  "unchained.notification.iv.capture": "Seu vínculo com o(a) %1$s %2$s capturado(a) revelou IVs perfeitos!",
+  "unchained.notification.iv.snack": "A qualidade do seu petisco atraiu um(a) %1$s %2$s com IVs perfeitos!",
+  "unchained.notification.shiny.spawn": "Sua caçada atrai um(a) %1$s %2$s brilhante!",
+  "unchained.notification.shiny.fish": "Sua viagem de pesca pescou um(a) %1$s %2$s brilhante!",
+  "unchained.notification.shiny.egg": "Sua aura nutridora despertou um(a) %1$s %2$s brilhante!",
+  "unchained.notification.shiny.resurrection": "Sua maestria técnica despertou um(a) %1$s %2$s brilhante!",
+  "unchained.notification.shiny.snack": "A qualidade do seu petisco atraiu um(a) %1$s %2$s em sua forma brilhante!"
+}
