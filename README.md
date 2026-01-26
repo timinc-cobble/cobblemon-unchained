@@ -1,6 +1,6 @@
 # Unchained
 
-v1.7.1-1.7
+v1.7.2-1.7
 
 [Modrinth](https://modrinth.com/mod/cobblemon-unchained)
 
@@ -24,6 +24,7 @@ v1.7.1-1.7
     - Hatches from an egg
     - Is revived from a fossil
     - Is captured by a player
+    - Spawns from snacking on a snack
 - All bonuses are optional and highly configurable.
 - Use *every* stat from the [Counter](https://www.notion.so/Counter-21d57e0d4afd80d0815fc97b89368998?pvs=21) mod
 - Smart spawn reservation system prevents steal attempts in multiplayer
@@ -40,23 +41,23 @@ v1.7.1-1.7
 
 ## Testing
 
-For the boosters, head over to [the config](https://www.notion.so/Config-Options-2b657e0d4afd8170a34eddd790195168?pvs=21) for the context you would like to test; for this example, we’re going to use the IV booster in a spawning context. Change the `debug` property to `true`, run the game, join a world. Run `/cobbled_counter set <player> capture streak <species> <form> 30`. Replace `<player>`  with your player name, `<species>` and `<form>` with something that spawns a lot nearby (for example, something like `/cobbled_counter set timinc capture streak wooloo normal 30`). Wait for the given Pokémon to spawn, and you should see Unchained's IV booster give feedback about the IVs that were perfected. While waiting, you should have also seen other debug lines go off describing how they failed.
+For the boosters, head over to [the config](https://www.notion.so/Config-Options-2f457e0d4afd8127914af1368e491dfc?pvs=21) for the context you would like to test; for this example, we’re going to use the IV booster in a spawning context. Change the `debug` property to `true`, run the game, join a world. Run `/cobbled_counter set <player> capture streak <species> <form> 30`. Replace `<player>`  with your player name, `<species>` and `<form>` with something that spawns a lot nearby (for example, something like `/cobbled_counter set timinc capture streak wooloo normal 30`). Wait for the given Pokémon to spawn, and you should see Unchained's IV booster give feedback about the IVs that were perfected. While waiting, you should have also seen other debug lines go off describing how they failed.
 
 ## Player Help
 
-[The Boosters](https://www.notion.so/The-Boosters-2b657e0d4afd81a38e28db6fc5e6b0c6?pvs=21)
+[The Boosters](https://www.notion.so/The-Boosters-2f457e0d4afd8185bfb2ddb1338f603b?pvs=21)
 
-[Config Options](https://www.notion.so/Config-Options-2b657e0d4afd8170a34eddd790195168?pvs=21)
+[Config Options](https://www.notion.so/Config-Options-2f457e0d4afd8127914af1368e491dfc?pvs=21)
 
 ## Addon Dev Help
 
 ### Resource Pack Help
 
-[Translations](https://www.notion.so/Translations-2b657e0d4afd81dcb7bbdf126d5a0346?pvs=21)
+[Translations](https://www.notion.so/Translations-2f457e0d4afd81d3ac98d808810b1a24?pvs=21)
 
 ## Mod Dev Help
 
-[Events](https://www.notion.so/Events-2b657e0d4afd810ba5e4f6d9088f2bd1?pvs=21)
+[Events](https://www.notion.so/Events-2f457e0d4afd8112bd3cf489ac60d71b?pvs=21)
 
 ## Roadmap
 
