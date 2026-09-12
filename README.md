@@ -1,6 +1,6 @@
 # Unchained
 
-v1.7.3-1.7
+v1.8.0-1.7
 
 [Modrinth](https://modrinth.com/mod/cobblemon-unchained)
 
@@ -25,7 +25,9 @@ v1.7.3-1.7
     - Is revived from a fossil
     - Is captured by a player
     - Spawns from snacking on a snack
+    - Spawns from an activated Habitat Block
 - All bonuses are optional and highly configurable.
+- Activated Habitat Block bonuses can be disabled globally to preserve their exact configured output.
 - Use *every* stat from the [Counter](https://www.notion.so/Counter-21d57e0d4afd80d0815fc97b89368998?pvs=21) mod
 - Smart spawn reservation system prevents steal attempts in multiplayer
 - Immersive in-game notifications when bonuses activate

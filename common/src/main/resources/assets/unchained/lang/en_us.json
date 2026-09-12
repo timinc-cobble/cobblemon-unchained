@@ -15,5 +15,6 @@
   "unchained.notification.shiny.fish": "Your fishing trip fished up a shiny %1$s %2$s!",
   "unchained.notification.shiny.egg": "Your nurturing aura coaxed out a shiny %1$s %2$s!",
   "unchained.notification.shiny.resurrection": "Your technical mastery awakened a shiny %1$s %2$s!",
+  "unchained.notification.shiny.capture": "Your bond with your captured %1$s %2$s revealed its shiny form!",
   "unchained.notification.shiny.snack": "The quality of your snack attracted a %1$s %2$s with its shiny form!"
 }
