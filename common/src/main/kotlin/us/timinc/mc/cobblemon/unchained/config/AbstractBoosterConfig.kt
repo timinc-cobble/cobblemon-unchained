@@ -15,10 +15,30 @@ abstract class AbstractBoosterConfig(
     val debug: Boolean = false
     val enabled: Boolean = true
     val lockToPlayer: Boolean = false
-    val blacklist = mutableSetOf<PokemonMatcher>()
-    val whitelist = mutableSetOf<PokemonMatcher>()
+    val blacklist = listOf<String>()
+    val whitelist = listOf<String>()
     val careAboutForms: Boolean = true
     val notifyPlayer: Boolean = true
+
+    @Transient
+    var _blacklist: Set<PokemonMatcher>? = null
+    val blacklistMatchers: Set<PokemonMatcher>
+        get() {
+            if (_blacklist == null) {
+                _blacklist = blacklist.map(PokemonMatcher::parse).toSet()
+            }
+            return _blacklist!!
+        }
+
+    @Transient
+    var _whitelist: Set<PokemonMatcher>? = null
+    val whitelistMatchers: Set<PokemonMatcher>
+        get() {
+            if (_whitelist == null) {
+                _whitelist = whitelist.map(PokemonMatcher::parse).toSet()
+            }
+            return _whitelist!!
+        }
 
     abstract val points: Map<String, Map<String, Float>>
     abstract val thresholds: Map<Int, Float>

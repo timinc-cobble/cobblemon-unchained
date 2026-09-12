@@ -43,8 +43,10 @@ object IvBooster : AbstractBooster() {
     class IvBoosterInfluence(
         private val config: IvBoosterConfig,
         private val player: ServerPlayer? = null,
+        private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
         override fun affectSpawn(action: SpawnAction<*>, entity: Entity) {
+            if (!enabled()) return
             if (action !is PokemonSpawnAction || entity !is PokemonEntity) return
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
@@ -85,6 +87,12 @@ object IvBooster : AbstractBooster() {
         Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence(Unchained.ivSpawnBooster))
         Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence(Unchained.ivFishBooster))
         Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence(Unchained.ivSnackBooster))
+        Unchained.registerHabitatSpawnerInfluence(
+            IvBoosterInfluence(
+                Unchained.ivSpawnBooster,
+                enabled = { Unchained.config.boostActivatedHabitatSpawns },
+            )
+        )
         CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, IvEggHandler::handle)
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, IvFossilHandler::handle)
         CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, IvCaptureHandler::handle)

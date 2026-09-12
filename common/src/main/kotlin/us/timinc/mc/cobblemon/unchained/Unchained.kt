@@ -22,7 +22,9 @@ const val MOD_ID: String = "unchained"
 
 object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfig::class.java) {
 
-    class UnchainedConfig : AbstractConfig()
+    class UnchainedConfig : AbstractConfig() {
+        val boostActivatedHabitatSpawns: Boolean = true
+    }
 
     var hiddenSpawnBooster: HiddenBoosterConfig =
         ConfigBuilder.load(HiddenBoosterConfig.Spawn::class.java, "unchained/spawn/hiddenSpawnBooster")
@@ -96,7 +98,8 @@ object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfi
                 ConfigBuilder.load(HiddenBoosterConfig.Fish::class.java, "unchained/fish/hiddenFishBooster")
             hiddenCaptureBooster =
                 ConfigBuilder.load(HiddenBoosterConfig.Capture::class.java, "unchained/capture/hiddenCaptureBooster")
-            hiddenSnackBooster = ConfigBuilder.load(HiddenBoosterConfig.Snack::class.java, "unchained/snack/hiddenSnackBooster")
+            hiddenSnackBooster =
+                ConfigBuilder.load(HiddenBoosterConfig.Snack::class.java, "unchained/snack/hiddenSnackBooster")
             ivSpawnBooster = ConfigBuilder.load(IvBoosterConfig.Spawn::class.java, "unchained/spawn/ivSpawnBooster")
             ivEggBooster = ConfigBuilder.load(IvBoosterConfig.Egg::class.java, "unchained/egg/ivEggBooster")
             ivRezBooster =

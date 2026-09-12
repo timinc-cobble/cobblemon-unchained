@@ -5,13 +5,10 @@ import com.cobblemon.mod.common.api.events.CobblemonEvents
 import com.cobblemon.mod.common.api.events.pokemon.FossilRevivedEvent
 import com.cobblemon.mod.common.api.events.pokemon.HatchEggEvent
 import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent
-import com.cobblemon.mod.common.api.spawning.BestSpawner.fishingSpawner
 import com.cobblemon.mod.common.api.spawning.detail.PokemonSpawnAction
 import com.cobblemon.mod.common.api.spawning.detail.SpawnAction
 import com.cobblemon.mod.common.api.spawning.influence.SpawningInfluence
-import com.cobblemon.mod.common.api.spawning.spawner.PlayerSpawnerFactory
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
-import com.cobblemon.mod.common.platform.events.PlatformEvents
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Entity
 import us.timinc.mc.cobblemon.timcore.AbstractHandler
@@ -58,8 +55,10 @@ object HiddenBooster : AbstractBooster() {
     class HiddenBoosterInfluence(
         private val config: HiddenBoosterConfig,
         private val player: ServerPlayer? = null,
+        private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
         override fun affectSpawn(action: SpawnAction<*>, entity: Entity) {
+            if (!enabled()) return
             if (action !is PokemonSpawnAction || entity !is PokemonEntity) return
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
@@ -99,6 +98,12 @@ object HiddenBooster : AbstractBooster() {
         Unchained.registerPlayerSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSpawnBooster))
         Unchained.registerFishingSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenFishBooster))
         Unchained.registerSnackSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSnackBooster))
+        Unchained.registerHabitatSpawnerInfluence(
+            HiddenBoosterInfluence(
+                Unchained.hiddenSpawnBooster,
+                enabled = { Unchained.config.boostActivatedHabitatSpawns },
+            )
+        )
         CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, HiddenEggHandler::handle)
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, HiddenFossilHandler::handle)
         CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, HiddenCaptureHandler::handle)

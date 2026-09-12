@@ -29,7 +29,12 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
         if (!config.enabled) return false
         debug("Running ${config.key} booster for ${species}|${form.name}")
 
-        if (!LimitedList.PokemonMatcherList.matchesList(pokemon.getPokemon(), config.whitelist, config.blacklist)) {
+        if (!LimitedList.PokemonMatcherList.matchesList(
+                pokemon.getPokemon(),
+                config.whitelistMatchers,
+                config.blacklistMatchers
+            )
+        ) {
             debug("${species.name}|${form.name} is prohibited by the whitelist/blacklist.")
             return false
         }
