@@ -32,7 +32,7 @@ object ShinyBooster : AbstractBooster() {
         lockToPlayer,
     ) {
 
-        override fun roll(): Boolean {
+        override fun roll(unlockedBoost: Float): Boolean {
             var shinyRate = Cobblemon.config.shinyRate
             CobblemonEvents.SHINY_CHANCE_CALCULATION.post(
                 ShinyChanceCalculationEvent(
@@ -58,7 +58,7 @@ object ShinyBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float) {
             pokemon.makeShiny()
             debug("Pokemon made shiny.")
         }
