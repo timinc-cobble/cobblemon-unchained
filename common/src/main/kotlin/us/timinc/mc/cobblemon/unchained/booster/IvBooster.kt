@@ -41,7 +41,7 @@ object IvBooster : AbstractBooster() {
     }
 
     class IvBoosterInfluence(
-        private val config: IvBoosterConfig,
+        private val config: () -> IvBoosterConfig,
         private val player: ServerPlayer? = null,
         private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
@@ -51,7 +51,7 @@ object IvBooster : AbstractBooster() {
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
 
-            Runner(player, pokemonRep, config) { entity.pokemon.reserveFor(player) }.runThrough()
+            Runner(player, pokemonRep, config()) { entity.pokemon.reserveFor(player) }.runThrough()
         }
     }
 
@@ -84,12 +84,12 @@ object IvBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence(Unchained.ivSpawnBooster))
-        Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence(Unchained.ivFishBooster))
-        Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence(Unchained.ivSnackBooster))
+        Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSpawnBooster }))
+        Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence({ Unchained.ivFishBooster }))
+        Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSnackBooster }))
         Unchained.registerHabitatSpawnerInfluence(
             IvBoosterInfluence(
-                Unchained.ivSpawnBooster,
+                { Unchained.ivSpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
