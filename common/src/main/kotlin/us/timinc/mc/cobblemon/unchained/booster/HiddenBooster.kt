@@ -53,7 +53,7 @@ object HiddenBooster : AbstractBooster() {
     }
 
     class HiddenBoosterInfluence(
-        private val config: HiddenBoosterConfig,
+        private val config: () -> HiddenBoosterConfig,
         private val player: ServerPlayer? = null,
         private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
@@ -63,7 +63,7 @@ object HiddenBooster : AbstractBooster() {
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
 
-            Runner(player, pokemonRep, config) { entity.pokemon.reserveFor(player) }.runThrough()
+            Runner(player, pokemonRep, config()) { entity.pokemon.reserveFor(player) }.runThrough()
         }
     }
 
@@ -95,12 +95,12 @@ object HiddenBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSpawnBooster))
-        Unchained.registerFishingSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenFishBooster))
-        Unchained.registerSnackSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSnackBooster))
+        Unchained.registerPlayerSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenSpawnBooster }))
+        Unchained.registerFishingSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenFishBooster }))
+        Unchained.registerSnackSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenSnackBooster }))
         Unchained.registerHabitatSpawnerInfluence(
             HiddenBoosterInfluence(
-                Unchained.hiddenSpawnBooster,
+                { Unchained.hiddenSpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
