@@ -76,7 +76,10 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
 
         if ((!passedTest && !preEvent.ignoreTest) || (!passedRoll && !preEvent.ignoreRoll) || !passedEvent) return false
 
-        boost(usedUnlockedBoost)
+        if (!boost(usedUnlockedBoost)) {
+            debug("No boost applied")
+            return false
+        }
         streakTypes.forEach {
             player.getCounterManager().breakStreak(it)
         }
@@ -100,7 +103,7 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
 
     abstract fun test(): Boolean
 
-    abstract fun boost(unlockedBoost: Float)
+    abstract fun boost(unlockedBoost: Float): Boolean
 
     open fun notifyPlayer() {
         player.sendSystemMessage(Unchained.TranslationComponents.notify(config.key, species, form))

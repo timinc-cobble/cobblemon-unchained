@@ -58,9 +58,10 @@ object ShinyBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost(unlockedBoost: Float) {
+        override fun boost(unlockedBoost: Float): Boolean {
             pokemon.makeShiny()
             debug("Pokemon made shiny.")
+            return true
         }
     }
 

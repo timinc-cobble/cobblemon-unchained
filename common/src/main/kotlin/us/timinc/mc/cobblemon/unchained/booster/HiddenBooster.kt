@@ -46,9 +46,10 @@ object HiddenBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost(unlockedBoost: Float) {
+        override fun boost(unlockedBoost: Float): Boolean {
             pokemon.giveHiddenAbility()
             debug("Gave hidden ability ${pokemon.abilityName}")
+            return true
         }
     }
 
