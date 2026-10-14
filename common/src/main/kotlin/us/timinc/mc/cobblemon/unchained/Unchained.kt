@@ -72,7 +72,7 @@ object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfi
             ivFishBooster, ivCaptureBooster, ivSnackBooster,
             shinySpawnBooster, shinyEggBooster, shinyRezBooster,
             shinyFishBooster, shinyCaptureBooster, shinySnackBooster,
-        ).forEach { it.validateRegistryNames() }
+        ).forEach { it.validateConfig() }
     }
 
     object TranslationComponents {
