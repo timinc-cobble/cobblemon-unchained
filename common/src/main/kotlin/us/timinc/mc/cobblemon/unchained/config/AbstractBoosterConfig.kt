@@ -46,10 +46,10 @@ abstract class AbstractBoosterConfig(
     abstract val breakStreakOnSuccess: Set<String>
 
     @Transient
-    var registryNamesValid: Boolean = false
+    var configValid: Boolean = false
         private set
 
-    fun validateRegistryNames(): Boolean {
+    fun validateConfig(): Boolean {
         val counterTypes = CounterTypeRegistry.types().toSet()
         val scoreTypes = ScoreTypeRegistry.types().toSet()
         val errors = buildList {
@@ -59,6 +59,11 @@ abstract class AbstractBoosterConfig(
                     if (scoreType !in scoreTypes) add("points.$counterType: unknown score '$scoreType'")
                 }
             }
+            boostValidationError(defaultValue)?.let { add("defaultValue: $it") }
+            thresholds.forEach { (threshold, boost) ->
+                boostValidationError(boost)?.let { add("thresholds.$threshold: $it") }
+            }
+            addAll(additionalValidationErrors())
             breakStreakOnSuccess.forEach { counterType ->
                 if (counterType !in counterTypes) add("breakStreakOnSuccess: unknown counter '$counterType'")
             }
@@ -66,16 +71,21 @@ abstract class AbstractBoosterConfig(
         errors.forEach { error ->
             Unchained.debugger.debug("Skipping booster '$key': $error. Correct its config and reload.", true)
         }
-        registryNamesValid = errors.isEmpty()
-        return registryNamesValid
+        configValid = errors.isEmpty()
+        return configValid
     }
+
+    open fun boostValidationError(boost: Float): String? =
+        if (boost < 0F) "boost must be nonnegative (got $boost)" else null
+
+    open fun additionalValidationErrors(): List<String> = emptyList()
 
     fun getPointsFromThreshold(
         player: ServerPlayer,
         species: ResourceLocation,
         form: String,
     ): Float {
-        if (!registryNamesValid) return 0F
+        if (!configValid) return 0F
         val calcForm = if (careAboutForms) form else null
         val counterManager = player.getCounterManager()
 

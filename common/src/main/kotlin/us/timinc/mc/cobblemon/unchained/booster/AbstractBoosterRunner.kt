@@ -26,7 +26,7 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
         get() = config.getPointsFromThreshold(player, species.resourceIdentifier, form.name)
 
     fun runThrough(): Boolean {
-        if (!config.enabled || !config.registryNamesValid) return false
+        if (!config.enabled || !config.configValid) return false
         val streakTypes = config.breakStreakOnSuccess.map(CounterTypeRegistry::findByType)
         debug("Running ${config.key} booster for ${species}|${form.name}")
 
@@ -50,6 +50,12 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
             } else {
                 debug("Using boost of $usedUnlockedBoost")
             }
+        }
+
+        val boostError = config.boostValidationError(usedUnlockedBoost)
+        if (boostError != null) {
+            debug("Skipping ${config.key}: $boostError", true)
+            return false
         }
 
         if (usedUnlockedBoost == 0F) {

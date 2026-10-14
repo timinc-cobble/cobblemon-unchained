@@ -6,6 +6,13 @@ import us.timinc.mc.cobblemon.counter.CounterMod.CounterTypes.RESURRECTION
 import us.timinc.mc.cobblemon.counter.CounterMod.ScoreTypes.STREAK
 
 abstract class IvBoosterConfig(key: String) : AbstractBoosterConfig(key) {
+    override fun boostValidationError(boost: Float): String? {
+        super.boostValidationError(boost)?.let { return it }
+        return if (boost % 1F != 0F) {
+            "IV boost must be a nonnegative whole number (got $boost)"
+        } else null
+    }
+
     class Spawn : IvBoosterConfig("iv.spawn") {
         override val points = mapOf(
             CAPTURE.type to mapOf(
