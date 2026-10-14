@@ -41,7 +41,7 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
 
         var usedUnlockedBoost: Float = unlockedBoost
         Unchained.Events.BOOST_CALCULATION.post(
-            BoostCalculation(config.key, pokemon, player, unlockedBoost)
+            BoostCalculation(config.key, pokemon, player, usedUnlockedBoost)
         ) { evt ->
             if (evt.unlockedBoost != usedUnlockedBoost) {
                 usedUnlockedBoost = evt.unlockedBoost
@@ -56,7 +56,7 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
             return false
         }
 
-        val passedRoll = roll()
+        val passedRoll = roll(usedUnlockedBoost)
         val passedTest = test()
 
         var passedEvent = false
@@ -69,7 +69,7 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
 
         if ((!passedTest && !preEvent.ignoreTest) || (!passedRoll && !preEvent.ignoreRoll) || !passedEvent) return false
 
-        boost()
+        boost(usedUnlockedBoost)
         config.breakStreakOnSuccess.forEach {
             player.getCounterManager().breakStreak(CounterTypeRegistry.findByType(it))
         }
@@ -89,11 +89,11 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
         return true
     }
 
-    abstract fun roll(): Boolean
+    abstract fun roll(unlockedBoost: Float): Boolean
 
     abstract fun test(): Boolean
 
-    abstract fun boost()
+    abstract fun boost(unlockedBoost: Float)
 
     open fun notifyPlayer() {
         player.sendSystemMessage(Unchained.TranslationComponents.notify(config.key, species, form))

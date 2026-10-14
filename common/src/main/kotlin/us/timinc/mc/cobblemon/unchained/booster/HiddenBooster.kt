@@ -25,7 +25,7 @@ object HiddenBooster : AbstractBooster() {
         override val config: HiddenBoosterConfig,
         lockToPlayer: () -> Unit = {},
     ) : AbstractBoosterRunner<HiddenBoosterConfig>(player, pokemon, lockToPlayer) {
-        override fun roll(): Boolean {
+        override fun roll(unlockedBoost: Float): Boolean {
             val totalMarbles = config.marbles
 
             val roll = nextFloat() * totalMarbles
@@ -46,7 +46,7 @@ object HiddenBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float) {
             pokemon.giveHiddenAbility()
             debug("Gave hidden ability ${pokemon.abilityName}")
         }

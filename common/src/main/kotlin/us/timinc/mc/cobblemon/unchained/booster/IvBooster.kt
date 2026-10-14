@@ -29,11 +29,11 @@ object IvBooster : AbstractBooster() {
         lockToPlayer,
     ) {
 
-        override fun roll(): Boolean = true
+        override fun roll(unlockedBoost: Float): Boolean = true
 
         override fun test(): Boolean = true
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float) {
             val boostedIvs = unlockedBoost.toInt()
             val perfectedIvs = pokemon.makePerfectIvs(boostedIvs)
             debug("Made $perfectedIvs perfect.")
