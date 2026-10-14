@@ -26,7 +26,8 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
         get() = config.getPointsFromThreshold(player, species.resourceIdentifier, form.name)
 
     fun runThrough(): Boolean {
-        if (!config.enabled) return false
+        if (!config.enabled || !config.registryNamesValid) return false
+        val streakTypes = config.breakStreakOnSuccess.map(CounterTypeRegistry::findByType)
         debug("Running ${config.key} booster for ${species}|${form.name}")
 
         if (!LimitedList.PokemonMatcherList.matchesList(
@@ -70,8 +71,8 @@ abstract class AbstractBoosterRunner<T : AbstractBoosterConfig>(
         if ((!passedTest && !preEvent.ignoreTest) || (!passedRoll && !preEvent.ignoreRoll) || !passedEvent) return false
 
         boost(usedUnlockedBoost)
-        config.breakStreakOnSuccess.forEach {
-            player.getCounterManager().breakStreak(CounterTypeRegistry.findByType(it))
+        streakTypes.forEach {
+            player.getCounterManager().breakStreak(it)
         }
         if (config.lockToPlayer) {
             lockToPlayer()
