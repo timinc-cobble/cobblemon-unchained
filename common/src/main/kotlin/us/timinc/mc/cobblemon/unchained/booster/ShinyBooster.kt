@@ -80,11 +80,12 @@ object ShinyBooster : AbstractBooster() {
         }
     }
 
-    object ShinyEggHandler : AbstractHandler<HatchEggEvent.Pre>() {
-        override fun handle(evt: HatchEggEvent.Pre) {
+    object ShinyEggHandler : AbstractHandler<HatchEggEvent.Post>() {
+        override fun handle(evt: HatchEggEvent.Post) {
+            val player = evt.player
             Runner(
-                evt.player,
-                PokemonRepresentation.FromProperties(evt.egg),
+                player,
+                PokemonRepresentation.FromPokemon(evt.pokemon),
                 Unchained.shinyEggBooster
             ).runThrough()
         }
@@ -122,8 +123,8 @@ object ShinyBooster : AbstractBooster() {
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
-        CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, ShinyEggHandler::handle)
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, ShinyFossilHandler::handle)
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, ShinyCaptureHandler::handle)
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, ShinyEggHandler::handle)
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, ShinyFossilHandler::handle)
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOW, ShinyCaptureHandler::handle)
     }
 }

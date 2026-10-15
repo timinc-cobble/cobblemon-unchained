@@ -56,11 +56,12 @@ object IvBooster : AbstractBooster() {
         }
     }
 
-    object IvEggHandler : AbstractHandler<HatchEggEvent.Pre>() {
-        override fun handle(evt: HatchEggEvent.Pre) {
+    object IvEggHandler : AbstractHandler<HatchEggEvent.Post>() {
+        override fun handle(evt: HatchEggEvent.Post) {
+            val player = evt.player
             Runner(
-                evt.player,
-                PokemonRepresentation.FromProperties(evt.egg),
+                player,
+                PokemonRepresentation.FromPokemon(evt.pokemon),
                 Unchained.ivEggBooster
             ).runThrough()
         }
@@ -94,8 +95,8 @@ object IvBooster : AbstractBooster() {
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
-        CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, IvEggHandler::handle)
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, IvFossilHandler::handle)
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, IvCaptureHandler::handle)
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, IvEggHandler::handle)
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, IvFossilHandler::handle)
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOW, IvCaptureHandler::handle)
     }
 }
