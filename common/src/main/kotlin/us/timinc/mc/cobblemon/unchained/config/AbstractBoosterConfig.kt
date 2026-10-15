@@ -6,6 +6,7 @@ import us.timinc.mc.cobblemon.counter.api.CounterTypeRegistry
 import us.timinc.mc.cobblemon.counter.api.ScoreTypeRegistry
 import us.timinc.mc.cobblemon.counter.extension.getCounterManager
 import us.timinc.mc.cobblemon.timcore.PokemonMatcher
+import us.timinc.mc.cobblemon.unchained.Unchained
 
 abstract class AbstractBoosterConfig(
     @Transient
@@ -44,24 +45,55 @@ abstract class AbstractBoosterConfig(
     abstract val thresholds: Map<Int, Float>
     abstract val breakStreakOnSuccess: Set<String>
 
+    @Transient
+    var configValid: Boolean = false
+        private set
+
+    fun validateConfig(): Boolean {
+        val counterTypes = CounterTypeRegistry.types().toSet()
+        val scoreTypes = ScoreTypeRegistry.types().toSet()
+        val errors = buildList {
+            points.forEach { (counterType, scores) ->
+                if (counterType !in counterTypes) add("points: unknown counter '$counterType'")
+                scores.keys.forEach { scoreType ->
+                    if (scoreType !in scoreTypes) add("points.$counterType: unknown score '$scoreType'")
+                }
+            }
+            boostValidationError(defaultValue)?.let { add("defaultValue: $it") }
+            thresholds.forEach { (threshold, boost) ->
+                boostValidationError(boost)?.let { add("thresholds.$threshold: $it") }
+            }
+            addAll(additionalValidationErrors())
+            breakStreakOnSuccess.forEach { counterType ->
+                if (counterType !in counterTypes) add("breakStreakOnSuccess: unknown counter '$counterType'")
+            }
+        }
+        errors.forEach { error ->
+            Unchained.debugger.debug("Skipping booster '$key': $error. Correct its config and reload.", true)
+        }
+        configValid = errors.isEmpty()
+        return configValid
+    }
+
+    open fun boostValidationError(boost: Float): String? =
+        if (boost < 0F) "boost must be nonnegative (got $boost)" else null
+
+    open fun additionalValidationErrors(): List<String> = emptyList()
+
     fun getPointsFromThreshold(
         player: ServerPlayer,
         species: ResourceLocation,
         form: String,
     ): Float {
+        if (!configValid) return 0F
         val calcForm = if (careAboutForms) form else null
         val counterManager = player.getCounterManager()
 
         val totalPoints = points.entries.fold(0F) { pointAcc, (counterTypeName, scoreTypeMap) ->
             pointAcc + scoreTypeMap.entries.fold(0F) { counterTypeAcc, (scoreTypeName, multiplier) ->
-                counterTypeAcc + (try {
-                    val scoreType = ScoreTypeRegistry.findByType(scoreTypeName)
-                    val counterType = CounterTypeRegistry.findByType(counterTypeName)
-
-                    scoreType.getScore(counterManager, counterType, species, calcForm) * multiplier
-                } catch (error: Error) {
-                    0F
-                })
+                val scoreType = ScoreTypeRegistry.findByType(scoreTypeName)
+                val counterType = CounterTypeRegistry.findByType(counterTypeName)
+                counterTypeAcc + scoreType.getScore(counterManager, counterType, species, calcForm) * multiplier
             }
         }
 

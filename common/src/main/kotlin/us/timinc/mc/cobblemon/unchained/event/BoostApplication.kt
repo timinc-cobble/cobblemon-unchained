@@ -15,8 +15,8 @@ interface BoostApplication {
         override val player: ServerPlayer,
         val passedRoll: Boolean,
         val passedTest: Boolean,
-        val ignoreRoll: Boolean = false,
-        val ignoreTest: Boolean = false,
+        var ignoreRoll: Boolean = false,
+        var ignoreTest: Boolean = false,
     ) : BoostApplication, Cancelable()
 
     class Post(

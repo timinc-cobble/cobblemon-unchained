@@ -32,7 +32,7 @@ object ShinyBooster : AbstractBooster() {
         lockToPlayer,
     ) {
 
-        override fun roll(): Boolean {
+        override fun roll(unlockedBoost: Float): Boolean {
             var shinyRate = Cobblemon.config.shinyRate
             CobblemonEvents.SHINY_CHANCE_CALCULATION.post(
                 ShinyChanceCalculationEvent(
@@ -44,7 +44,7 @@ object ShinyBooster : AbstractBooster() {
             }
             if (shinyRate < 1) shinyRate = 1 / shinyRate
             val roll = nextFloat()
-            val passedRoll = roll < ((1 + unlockedBoost) / shinyRate)
+            val passedRoll = roll < (unlockedBoost / shinyRate)
             debug("Calculated shiny rate is $shinyRate. Roll is $roll. Roll ${if (passedRoll) "passed" else "failed"}.")
             return passedRoll
         }
@@ -58,14 +58,15 @@ object ShinyBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float): Boolean {
             pokemon.makeShiny()
             debug("Pokemon made shiny.")
+            return true
         }
     }
 
     class ShinyBoosterInfluence(
-        private val config: ShinyBoosterConfig,
+        private val config: () -> ShinyBoosterConfig,
         private val player: ServerPlayer? = null,
         private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
@@ -75,15 +76,16 @@ object ShinyBooster : AbstractBooster() {
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
 
-            Runner(player, pokemonRep, config) { entity.pokemon.reserveFor(player) }.runThrough()
+            Runner(player, pokemonRep, config()) { entity.pokemon.reserveFor(player) }.runThrough()
         }
     }
 
-    object ShinyEggHandler : AbstractHandler<HatchEggEvent.Pre>() {
-        override fun handle(evt: HatchEggEvent.Pre) {
+    object ShinyEggHandler : AbstractHandler<HatchEggEvent.Post>() {
+        override fun handle(evt: HatchEggEvent.Post) {
+            val player = evt.player
             Runner(
-                evt.player,
-                PokemonRepresentation.FromProperties(evt.egg),
+                player,
+                PokemonRepresentation.FromPokemon(evt.pokemon),
                 Unchained.shinyEggBooster
             ).runThrough()
         }
@@ -112,17 +114,17 @@ object ShinyBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(ShinyBoosterInfluence(Unchained.shinySpawnBooster))
-        Unchained.registerFishingSpawnerInfluence(ShinyBoosterInfluence(Unchained.shinyFishBooster))
-        Unchained.registerSnackSpawnerInfluence(ShinyBoosterInfluence(Unchained.shinySnackBooster))
+        Unchained.registerPlayerSpawnerInfluence(ShinyBoosterInfluence({ Unchained.shinySpawnBooster }))
+        Unchained.registerFishingSpawnerInfluence(ShinyBoosterInfluence({ Unchained.shinyFishBooster }))
+        Unchained.registerSnackSpawnerInfluence(ShinyBoosterInfluence({ Unchained.shinySnackBooster }))
         Unchained.registerHabitatSpawnerInfluence(
             ShinyBoosterInfluence(
-                Unchained.shinySpawnBooster,
+                { Unchained.shinySpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
-        CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, ShinyEggHandler::handle)
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, ShinyFossilHandler::handle)
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, ShinyCaptureHandler::handle)
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, ShinyEggHandler::handle)
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, ShinyFossilHandler::handle)
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOW, ShinyCaptureHandler::handle)
     }
 }

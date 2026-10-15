@@ -80,5 +80,8 @@ abstract class HiddenBoosterConfig(key: String) : AbstractBoosterConfig(key) {
         override val breakStreakOnSuccess: Set<String> = setOf()
     }
 
+    override fun additionalValidationErrors(): List<String> =
+        if (marbles <= 0) listOf("marbles: must be greater than zero (got $marbles)") else emptyList()
+
     val marbles = 5
 }

@@ -29,19 +29,20 @@ object IvBooster : AbstractBooster() {
         lockToPlayer,
     ) {
 
-        override fun roll(): Boolean = true
+        override fun roll(unlockedBoost: Float): Boolean = true
 
         override fun test(): Boolean = true
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float): Boolean {
             val boostedIvs = unlockedBoost.toInt()
             val perfectedIvs = pokemon.makePerfectIvs(boostedIvs)
             debug("Made $perfectedIvs perfect.")
+            return perfectedIvs.isNotEmpty()
         }
     }
 
     class IvBoosterInfluence(
-        private val config: IvBoosterConfig,
+        private val config: () -> IvBoosterConfig,
         private val player: ServerPlayer? = null,
         private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
@@ -51,15 +52,16 @@ object IvBooster : AbstractBooster() {
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
 
-            Runner(player, pokemonRep, config) { entity.pokemon.reserveFor(player) }.runThrough()
+            Runner(player, pokemonRep, config()) { entity.pokemon.reserveFor(player) }.runThrough()
         }
     }
 
-    object IvEggHandler : AbstractHandler<HatchEggEvent.Pre>() {
-        override fun handle(evt: HatchEggEvent.Pre) {
+    object IvEggHandler : AbstractHandler<HatchEggEvent.Post>() {
+        override fun handle(evt: HatchEggEvent.Post) {
+            val player = evt.player
             Runner(
-                evt.player,
-                PokemonRepresentation.FromProperties(evt.egg),
+                player,
+                PokemonRepresentation.FromPokemon(evt.pokemon),
                 Unchained.ivEggBooster
             ).runThrough()
         }
@@ -84,17 +86,17 @@ object IvBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence(Unchained.ivSpawnBooster))
-        Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence(Unchained.ivFishBooster))
-        Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence(Unchained.ivSnackBooster))
+        Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSpawnBooster }))
+        Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence({ Unchained.ivFishBooster }))
+        Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSnackBooster }))
         Unchained.registerHabitatSpawnerInfluence(
             IvBoosterInfluence(
-                Unchained.ivSpawnBooster,
+                { Unchained.ivSpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
-        CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, IvEggHandler::handle)
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, IvFossilHandler::handle)
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, IvCaptureHandler::handle)
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, IvEggHandler::handle)
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, IvFossilHandler::handle)
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOW, IvCaptureHandler::handle)
     }
 }

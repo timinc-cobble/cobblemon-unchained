@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.reactive.CancelableObservable
 import com.cobblemon.mod.common.api.reactive.EventObservable
 import com.cobblemon.mod.common.pokemon.FormData
 import com.cobblemon.mod.common.pokemon.Species
+import com.cobblemon.mod.common.platform.events.PlatformEvents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import us.timinc.mc.cobblemon.timcore.AbstractConfig
@@ -63,6 +64,17 @@ object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfi
     var shinySnackBooster: ShinyBoosterConfig =
         ConfigBuilder.load(ShinyBoosterConfig.Snack::class.java, "unchained/snack/shinySnackBooster")
 
+    private fun validateBoosterConfigs() {
+        listOf(
+            hiddenSpawnBooster, hiddenEggBooster, hiddenRezBooster,
+            hiddenFishBooster, hiddenCaptureBooster, hiddenSnackBooster,
+            ivSpawnBooster, ivEggBooster, ivRezBooster,
+            ivFishBooster, ivCaptureBooster, ivSnackBooster,
+            shinySpawnBooster, shinyEggBooster, shinyRezBooster,
+            shinyFishBooster, shinyCaptureBooster, shinySnackBooster,
+        ).forEach { it.validateConfig() }
+    }
+
     object TranslationComponents {
         fun notify(type: String, species: Species, form: FormData): MutableComponent = Component.translatable(
             "unchained.notification.$type",
@@ -86,6 +98,8 @@ object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfi
         HiddenBooster.initialize()
         IvBooster.initialize()
         ShinyBooster.initialize()
+
+        PlatformEvents.SERVER_STARTED.subscribe { validateBoosterConfigs() }
 
         RELOAD_CONFIG.subscribe {
             hiddenSpawnBooster =
@@ -121,6 +135,7 @@ object Unchained : AbstractMod<Unchained.UnchainedConfig>(MOD_ID, UnchainedConfi
                 ConfigBuilder.load(ShinyBoosterConfig.Capture::class.java, "unchained/capture/shinyCaptureBooster")
             shinySnackBooster =
                 ConfigBuilder.load(ShinyBoosterConfig.Snack::class.java, "unchained/snack/shinySnackBooster")
+            validateBoosterConfigs()
         }
     }
 }

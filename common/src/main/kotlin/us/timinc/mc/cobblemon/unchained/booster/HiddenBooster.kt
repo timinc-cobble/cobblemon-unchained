@@ -25,7 +25,7 @@ object HiddenBooster : AbstractBooster() {
         override val config: HiddenBoosterConfig,
         lockToPlayer: () -> Unit = {},
     ) : AbstractBoosterRunner<HiddenBoosterConfig>(player, pokemon, lockToPlayer) {
-        override fun roll(): Boolean {
+        override fun roll(unlockedBoost: Float): Boolean {
             val totalMarbles = config.marbles
 
             val roll = nextFloat() * totalMarbles
@@ -46,14 +46,15 @@ object HiddenBooster : AbstractBooster() {
             return true
         }
 
-        override fun boost() {
+        override fun boost(unlockedBoost: Float): Boolean {
             pokemon.giveHiddenAbility()
             debug("Gave hidden ability ${pokemon.abilityName}")
+            return true
         }
     }
 
     class HiddenBoosterInfluence(
-        private val config: HiddenBoosterConfig,
+        private val config: () -> HiddenBoosterConfig,
         private val player: ServerPlayer? = null,
         private val enabled: () -> Boolean = { true },
     ) : SpawningInfluence {
@@ -63,14 +64,14 @@ object HiddenBooster : AbstractBooster() {
             val player = player ?: action.spawnablePosition.cause.entity as? ServerPlayer ?: return
             val pokemonRep = PokemonRepresentation.FromEntity(entity)
 
-            Runner(player, pokemonRep, config) { entity.pokemon.reserveFor(player) }.runThrough()
+            Runner(player, pokemonRep, config()) { entity.pokemon.reserveFor(player) }.runThrough()
         }
     }
 
-    object HiddenEggHandler : AbstractHandler<HatchEggEvent.Pre>() {
-        override fun handle(evt: HatchEggEvent.Pre) {
+    object HiddenEggHandler : AbstractHandler<HatchEggEvent.Post>() {
+        override fun handle(evt: HatchEggEvent.Post) {
             val player = evt.player
-            val pokemonRep = PokemonRepresentation.FromProperties(evt.egg)
+            val pokemonRep = PokemonRepresentation.FromPokemon(evt.pokemon)
             Runner(player, pokemonRep, Unchained.hiddenEggBooster).runThrough()
         }
     }
@@ -95,17 +96,17 @@ object HiddenBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSpawnBooster))
-        Unchained.registerFishingSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenFishBooster))
-        Unchained.registerSnackSpawnerInfluence(HiddenBoosterInfluence(Unchained.hiddenSnackBooster))
+        Unchained.registerPlayerSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenSpawnBooster }))
+        Unchained.registerFishingSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenFishBooster }))
+        Unchained.registerSnackSpawnerInfluence(HiddenBoosterInfluence({ Unchained.hiddenSnackBooster }))
         Unchained.registerHabitatSpawnerInfluence(
             HiddenBoosterInfluence(
-                Unchained.hiddenSpawnBooster,
+                { Unchained.hiddenSpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
             )
         )
-        CobblemonEvents.HATCH_EGG_PRE.subscribe(Priority.LOWEST, HiddenEggHandler::handle)
-        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, HiddenFossilHandler::handle)
-        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, HiddenCaptureHandler::handle)
+        CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, HiddenEggHandler::handle)
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, HiddenFossilHandler::handle)
+        CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOW, HiddenCaptureHandler::handle)
     }
 }

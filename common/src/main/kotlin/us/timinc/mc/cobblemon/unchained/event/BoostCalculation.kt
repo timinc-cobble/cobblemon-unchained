@@ -7,5 +7,5 @@ class BoostCalculation(
     val boostKey: String,
     val pokemonRep: PokemonRepresentation<*>,
     val player: ServerPlayer,
-    val unlockedBoost: Float,
+    var unlockedBoost: Float,
 )
