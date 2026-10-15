@@ -44,7 +44,7 @@ object ShinyBooster : AbstractBooster() {
             }
             if (shinyRate < 1) shinyRate = 1 / shinyRate
             val roll = nextFloat()
-            val passedRoll = roll < ((1 + unlockedBoost) / shinyRate)
+            val passedRoll = roll < (unlockedBoost / shinyRate)
             debug("Calculated shiny rate is $shinyRate. Roll is $roll. Roll ${if (passedRoll) "passed" else "failed"}.")
             return passedRoll
         }
