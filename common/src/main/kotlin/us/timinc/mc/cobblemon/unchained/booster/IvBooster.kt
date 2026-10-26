@@ -12,6 +12,10 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Entity
 import us.timinc.mc.cobblemon.timcore.AbstractHandler
+import us.timinc.mc.cobblemon.timcore.TimCore
+import us.timinc.mc.cobblemon.timcore.TimCoreEvents
+import us.timinc.mc.cobblemon.timcore.event.SpawningInfluenceEvents
+import us.timinc.mc.cobblemon.timcore.getType
 import us.timinc.mc.cobblemon.timcore.PokemonRepresentation
 import us.timinc.mc.cobblemon.timcore.reserveFor
 import us.timinc.mc.cobblemon.unchained.Unchained
@@ -56,6 +60,23 @@ object IvBooster : AbstractBooster() {
         }
     }
 
+    class IvSpawnHandler(
+        private val context: String,
+        private val config: () -> IvBoosterConfig,
+        private val enabled: () -> Boolean = { true },
+    ) : AbstractHandler<SpawningInfluenceEvents.Spawn>() {
+        override fun handle(evt: SpawningInfluenceEvents.Spawn) {
+            if (!enabled()) return
+            if (evt.position.spawner.getType() != context) return
+            val action = evt.action as? PokemonSpawnAction ?: return
+            val entity = evt.entity as? PokemonEntity ?: return
+            val player = action.spawnablePosition.cause.entity as? ServerPlayer ?: return
+            Runner(player, PokemonRepresentation.FromEntity(entity), config()) {
+                entity.pokemon.reserveFor(player)
+            }.runThrough()
+        }
+    }
+
     object IvEggHandler : AbstractHandler<HatchEggEvent.Post>() {
         override fun handle(evt: HatchEggEvent.Post) {
             val player = evt.player
@@ -86,14 +107,25 @@ object IvBooster : AbstractBooster() {
     }
 
     override fun initialize() {
-        Unchained.registerPlayerSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSpawnBooster }))
-        Unchained.registerFishingSpawnerInfluence(IvBoosterInfluence({ Unchained.ivFishBooster }))
-        Unchained.registerSnackSpawnerInfluence(IvBoosterInfluence({ Unchained.ivSnackBooster }))
-        Unchained.registerHabitatSpawnerInfluence(
-            IvBoosterInfluence(
+        TimCoreEvents.SPAWNING_SPAWN.subscribe(
+            Priority.LOW,
+            IvSpawnHandler(TimCore.DataKeys.SpawnerTypes.PLAYER, { Unchained.ivSpawnBooster })::handle,
+        )
+        TimCoreEvents.SPAWNING_SPAWN.subscribe(
+            Priority.LOW,
+            IvSpawnHandler(TimCore.DataKeys.SpawnerTypes.FISHING, { Unchained.ivFishBooster })::handle,
+        )
+        TimCoreEvents.SPAWNING_SPAWN.subscribe(
+            Priority.LOW,
+            IvSpawnHandler(TimCore.DataKeys.SpawnerTypes.SNACK, { Unchained.ivSnackBooster })::handle,
+        )
+        TimCoreEvents.SPAWNING_SPAWN.subscribe(
+            Priority.LOW,
+            IvSpawnHandler(
+                TimCore.DataKeys.SpawnerTypes.HABITAT,
                 { Unchained.ivSpawnBooster },
                 enabled = { Unchained.config.boostActivatedHabitatSpawns },
-            )
+            )::handle,
         )
         CobblemonEvents.HATCH_EGG_POST.subscribe(Priority.LOW, IvEggHandler::handle)
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOW, IvFossilHandler::handle)
