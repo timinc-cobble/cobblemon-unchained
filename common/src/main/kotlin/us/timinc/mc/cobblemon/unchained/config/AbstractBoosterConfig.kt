@@ -18,7 +18,6 @@ abstract class AbstractBoosterConfig(
     val lockToPlayer: Boolean = false
     val blacklist = listOf<String>()
     val whitelist = listOf<String>()
-    val careAboutForms: Boolean = true
     val notifyPlayer: Boolean = true
 
     @Transient
@@ -86,14 +85,13 @@ abstract class AbstractBoosterConfig(
         form: String,
     ): Float {
         if (!configValid) return 0F
-        val calcForm = if (careAboutForms) form else null
         val counterManager = player.getCounterManager()
 
         val totalPoints = points.entries.fold(0F) { pointAcc, (counterTypeName, scoreTypeMap) ->
             pointAcc + scoreTypeMap.entries.fold(0F) { counterTypeAcc, (scoreTypeName, multiplier) ->
                 val scoreType = ScoreTypeRegistry.findByType(scoreTypeName)
                 val counterType = CounterTypeRegistry.findByType(counterTypeName)
-                counterTypeAcc + scoreType.getScore(counterManager, counterType, species, calcForm) * multiplier
+                counterTypeAcc + scoreType.getScore(counterManager, counterType, species, form) * multiplier
             }
         }
 
