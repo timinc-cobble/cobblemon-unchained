@@ -1,7 +1,7 @@
 plugins {
+    id("com.gradleup.shadow")
     id("dev.architectury.loom")
     id("architectury-plugin")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 architectury {
@@ -12,12 +12,8 @@ architectury {
 loom {
     enableTransitiveAccessWideners.set(true)
     silentMojangMappingsLicense()
-
-    @Suppress("UnstableApiUsage")
-    mixin {
-        defaultRefmapName.set("mixins.${project.name}.refmap.json")
-    }
 }
+
 val shadowCommon = configurations.create("shadowCommon")
 
 dependencies {
@@ -44,28 +40,28 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit_version")}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit_version")}")
 
-    modImplementation("maven.modrinth:cobblemon-tim-core:${property("tim_core_fabric_version")}")
-    modImplementation("maven.modrinth:cobblemon-counter:${property("counter_fabric_version")}")
-}
-
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.processResources {
-    inputs.property("version", project.version)
-
-    filesMatching("fabric.mod.json") {
-        expand(project.properties)
-    }
-
+    modImplementation("us.timinc.mc.cobblemon.timcore:fabric:${property("tim_core_version")}") { isTransitive = false }
+    modImplementation("us.timinc.mc.cobblemon.counter:fabric:${property("counter_version")}") { isTransitive = false }
 }
 
 tasks {
+    processResources {
+        inputs.property("version", project.version)
+
+        filesMatching("fabric.mod.json") {
+            @Suppress("DEPRECATION", "We'll figure it out when Gradle 10 releases")
+            expand(project.properties)
+        }
+    }
 
     jar {
         archiveBaseName.set("${rootProject.property("archives_base_name")}-${project.name}")
         archiveClassifier.set("dev-slim")
+    }
+
+    sourcesJar {
+        dependsOn(project(":common").tasks.named("sourcesJar"))
+        from(project(":common").tasks.named<Jar>("sourcesJar").get().archiveFile.map { zipTree(it) })
     }
 
     shadowJar {
@@ -77,6 +73,11 @@ tasks {
     remapJar {
         dependsOn(shadowJar)
         inputFile.set(shadowJar.flatMap { it.archiveFile })
+        archiveBaseName.set("${rootProject.property("archives_base_name")}-${project.name}")
+        archiveVersion.set("${rootProject.version}")
+    }
+
+    remapSourcesJar {
         archiveBaseName.set("${rootProject.property("archives_base_name")}-${project.name}")
         archiveVersion.set("${rootProject.version}")
     }

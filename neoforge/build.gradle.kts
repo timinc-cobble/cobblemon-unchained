@@ -1,5 +1,5 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow")
     id("dev.architectury.loom")
     id("architectury-plugin")
 }
@@ -15,12 +15,9 @@ loom {
 }
 
 repositories {
-    mavenCentral()
-    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
-    maven("https://maven.impactdev.net/repository/development/")
     maven("https://hub.spigotmc.org/nexus/content/groups/public/")
     maven("https://thedarkcolour.github.io/KotlinForForge/")
-    maven("https://maven.neoforged.net")
+    maven("https://maven.neoforged.net/releases")
 }
 
 val shadowBundle = configurations.create("shadowBundle") {
@@ -48,23 +45,20 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit_version")}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${property("junit_version")}")
 
-    modImplementation("maven.modrinth:cobblemon-tim-core:${property("tim_core_neoforge_version")}")
-    modImplementation("maven.modrinth:cobblemon-counter:${property("counter_neoforge_version")}")
+    modImplementation("us.timinc.mc.cobblemon.timcore:neoforge:${property("tim_core_version")}") { isTransitive = false }
+    modImplementation("us.timinc.mc.cobblemon.counter:neoforge:${property("counter_version")}") { isTransitive = false }
 }
 
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
-}
-
-tasks.processResources {
-    inputs.property("version", project.version)
-
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand(project.properties)
-    }
-}
 
 tasks {
+    processResources {
+        inputs.property("version", project.version)
+
+        filesMatching("META-INF/neoforge.mods.toml") {
+            @Suppress("DEPRECATION", "We'll figure it out when Gradle 10 releases")
+            expand(project.properties)
+        }
+    }
 
     jar {
         archiveBaseName.set("${rootProject.property("archives_base_name")}-${project.name}")
@@ -72,6 +66,8 @@ tasks {
     }
 
     shadowJar {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
         exclude("fabric.mod.json")
         archiveClassifier.set("dev-shadow")
         archiveBaseName.set("${rootProject.property("archives_base_name")}-${project.name}")
